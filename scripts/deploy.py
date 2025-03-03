@@ -27,12 +27,16 @@ def read_template():
     return template_path.read_text()
 
 def get_stack_status(cf, stack_name):
+    """Retrieve the stack status and outputs"""
     try:
         resp = cf.describe_stacks(StackName=stack_name)
-        return resp["Stacks"][0]["StackStatus"]
+        stack = resp["Stacks"][0]
+        status = stack["StackStatus"]
+        outputs = {o["OutputKey"]: o["OutputValue"] for o in stack.get("Outputs", [])}
+        return status, outputs
     except ClientError as e:
         if "does not exist" in str(e):
-            return "DOES_NOT_EXIST"
+            return "DOES_NOT_EXIST", {}
         raise
 
 def main():
@@ -49,8 +53,14 @@ def main():
         return
 
     if args.action == "status":
-        status = get_stack_status(cf, STACK_NAME)
+        status, outputs = get_stack_status(cf, STACK_NAME)
         print(f"Stack {STACK_NAME} status: {status}")
+
+        ssh_command = outputs.get("SSHCommand")
+        if ssh_command:
+            print(f"SSH Command: {ssh_command}")
+        else:
+            print("SSH Command not available. Stack might not be fully created yet.")
         return
 
     if args.key_name is None:

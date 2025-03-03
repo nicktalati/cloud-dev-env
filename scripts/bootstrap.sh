@@ -10,7 +10,7 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y \
 
 chsh -s /usr/bin/zsh ubuntu
 
-echo 'export ZDOTDIR="$HOME/.config/zsh"' >> /etc/zshenv
+echo 'export ZDOTDIR="$HOME/.config/zsh"' >> /etc/zsh/zshenv
 
 sudo -u ubuntu bash <<'EOF'
 set -xe
