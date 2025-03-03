@@ -1,0 +1,119 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'GPU Development Environment (Ubuntu)'
+
+Parameters:
+  MyIpAddress:
+    Description: IP address to allow SSH access (CIDR format, e.g., 1.2.3.4/32)
+    Type: String
+    Default: '0.0.0.0/0'
+
+  KeyName:
+    Description: Name of an existing EC2 KeyPair to enable SSH access
+    Type: AWS::EC2::KeyPair::KeyName
+    ConstraintDescription: Must be the name of an existing EC2 KeyPair
+
+  InstanceType:
+    Description: GPU-enabled instance type
+    Type: String
+    Default: g4dn.xlarge
+    AllowedValues:
+      - g4dn.xlarge
+      - g4dn.2xlarge
+      - g4dn.4xlarge
+
+  VolumeSize:
+    Description: Size of the root volume in GB
+    Type: Number
+    Default: 100
+    MinValue: 8
+
+Mappings:
+  RegionMap:
+    us-east-1:
+      AMI: ami-049682606efa7fe65
+
+Resources:
+  GPUDevSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for GPU Dev environment
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Ref MyIpAddress
+          Description: SSH access
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-security-group
+
+  GPUDevRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: AllowSSMParameterRetrieval
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameter
+                  - ssm:GetParameters
+                  - ssm:GetParametersByPath
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - kms:Decrypt
+                Resource: "*"
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-instance-role
+
+  GPUDevInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref GPUDevRole
+
+  GPUDevInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref InstanceType
+      ImageId: !FindInMap [RegionMap, !Ref "AWS::Region", AMI]
+      KeyName: !Ref KeyName
+      SecurityGroupIds:
+        - !GetAtt GPUDevSecurityGroup.GroupId
+      IamInstanceProfile: !Ref GPUDevInstanceProfile
+      BlockDeviceMappings:
+        - DeviceName: /dev/sda1
+          Ebs:
+            VolumeSize: !Ref VolumeSize
+            VolumeType: gp3
+            DeleteOnTermination: true
+      UserData: !Base64
+        Fn::Sub: |
+          #!/bin/bash -xe
+          # Log user-data output
+          exec > >(tee /var/log/user-data.log | logger -t user-data -s 2>/dev/console) 2>&1
+
+          curl -o /tmp/bootstrap.sh https://raw.githubusercontent.com/nicktalati/cloud-dev-env/main/scripts/bootstrap.sh
+          chmod +x /tmp/bootstrap.sh
+          /tmp/bootstrap.sh
+
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-gpu-env
+        - Key: AutoShutdown
+          Value: 'true'
+
+Outputs:
+  SSHCommand:
+    Description: SSH command
+    Value: !Sub ssh -i ~/.ssh/${KeyName}.pem ubuntu@${GPUDevInstance.PublicIp}
