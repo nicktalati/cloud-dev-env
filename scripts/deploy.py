@@ -54,7 +54,7 @@ def main():
         return
 
     if args.key_name is None:
-        raise ValueError("key_name is required for action 'create' or 'update'")
+        raise ValueError("key-name is required for action 'create' or 'update'")
 
     template_body = read_template()
     parameters = [
