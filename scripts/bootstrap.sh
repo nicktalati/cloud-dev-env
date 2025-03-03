@@ -19,8 +19,6 @@ tar -C /opt -xzf nvim-linux-x86_64.tar.gz
 sudo -u ubuntu bash <<'EOF'
 set -xe
 
-echo 'export PATH="$PATH:/opt/nvim-linux-x86_64/bin"' >> $HOME/.config/zsh/.zshenv
-
 aws ssm get-parameter --region us-east-1 --name "id_rsa_aws" --with-decryption --query "Parameter.Value" --output text > $HOME/.ssh/id_rsa
 chmod 600 $HOME/.ssh/id_rsa
 
@@ -30,6 +28,8 @@ mkdir -p $HOME/.config
 ln -sf $HOME/dotfiles/zsh $HOME/.config/zsh
 ln -sf $HOME/dotfiles/tmux $HOME/.config/tmux
 ln -sf $HOME/dotfiles/nvim $HOME/.config/nvim
+
+echo 'export PATH="$PATH:/opt/nvim-linux-x86_64/bin"' >> $HOME/.config/zsh/.zshenv
 
 curl -fsSL https://pyenv.run | bash
 EOF
