@@ -6,7 +6,7 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y \
   git curl build-essential libssl-dev zlib1g-dev \
   libbz2-dev libreadline-dev libsqlite3-dev libncursesw5-dev xz-utils \
   tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev tree ripgrep \
-  tmux zsh
+  tmux zsh fzf
 
 chsh -s /usr/bin/zsh ubuntu
 
@@ -19,18 +19,17 @@ tar -C /opt -xzf nvim-linux-x86_64.tar.gz
 sudo -u ubuntu bash <<'EOF'
 set -xe
 
-echo 'export PATH="$PATH:/opt/nvim-linux-x86_64/bin"' >> $HOME/.zshenv
+echo 'export PATH="$PATH:/opt/nvim-linux-x86_64/bin"' >> $HOME/.config/.zshenv
 
-git clone https://github.com/nicktalati/dotfiles.git $HOME/dotfiles
+aws ssm get-parameter --region us-east-1 --name "id_rsa_aws" --with-decryption --query "Parameter.Value" --output text > $HOME/.ssh/id_rsa
+chmod 600 $HOME/.ssh/id_rsa
+
+git clone git@github.com:nicktalati/dotfiles.git $HOME/dotfiles
 
 mkdir -p $HOME/.config
 ln -sf $HOME/dotfiles/zsh $HOME/.config/zsh
 ln -sf $HOME/dotfiles/tmux $HOME/.config/tmux
 ln -sf $HOME/dotfiles/nvim $HOME/.config/nvim
-
-mkdir -p $HOME/.ssh
-aws ssm get-parameter --name "id_rsa_aws" --with-decryption --query "Parameter.Value" --output text > $HOME/.ssh/id_rsa
-chmod 600 $HOME/.ssh/id_rsa
 
 curl -fsSL https://pyenv.run | bash
 EOF
