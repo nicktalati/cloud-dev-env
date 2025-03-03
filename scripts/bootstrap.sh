@@ -12,12 +12,13 @@ chsh -s /usr/bin/zsh ubuntu
 
 echo 'export ZDOTDIR="$HOME/.config/zsh"' >> /etc/zsh/zshenv
 
-sudo -u ubuntu bash <<'EOF'
-set -xe
-
 curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
 rm -rf /opt/nvim
 tar -C /opt -xzf nvim-linux-x86_64.tar.gz
+
+sudo -u ubuntu bash <<'EOF'
+set -xe
+
 echo 'export PATH="$PATH:/opt/nvim-linux-x86_64/bin"' >> $HOME/.zshenv
 
 git clone https://github.com/nicktalati/dotfiles.git $HOME/dotfiles
