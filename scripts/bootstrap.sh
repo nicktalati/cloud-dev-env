@@ -10,7 +10,7 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y \
 
 chsh -s /usr/bin/zsh ubuntu
 
-echo 'export ZDOTDIR="$HOME/.config/zsh"' >> /etc/environment
+echo 'export ZDOTDIR="$HOME/.config/zsh"' >> /etc/zshenv
 
 sudo -u ubuntu bash <<'EOF'
 set -xe
@@ -26,6 +26,10 @@ mkdir -p $HOME/.config
 ln -sf $HOME/dotfiles/zsh $HOME/.config/zsh
 ln -sf $HOME/dotfiles/tmux $HOME/.config/tmux
 ln -sf $HOME/dotfiles/nvim $HOME/.config/nvim
+
+mkdir -p $HOME/.ssh
+aws ssm get-parameter --name "id_rsa_aws" --with-decryption --query "Parameter.Value" --output text > $HOME/.ssh/id_rsa
+chmod 600 $HOME/.ssh/id_rsa
 
 curl -fsSL https://pyenv.run | bash
 EOF

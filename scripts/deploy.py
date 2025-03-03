@@ -53,6 +53,9 @@ def main():
         print(f"Stack {STACK_NAME} status: {status}")
         return
 
+    if args.key_name is None:
+        raise ValueError("key_name is required for action 'create' or 'update'")
+
     template_body = read_template()
     parameters = [
         {"ParameterKey": "MyIpAddress", "ParameterValue": args.my_ip},
