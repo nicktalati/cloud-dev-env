@@ -19,7 +19,7 @@ tar -C /opt -xzf nvim-linux-x86_64.tar.gz
 sudo -u ubuntu bash <<'EOF'
 set -xe
 
-echo 'export PATH="$PATH:/opt/nvim-linux-x86_64/bin"' >> $HOME/.config/.zshenv
+echo 'export PATH="$PATH:/opt/nvim-linux-x86_64/bin"' >> $HOME/.config/zsh/.zshenv
 
 aws ssm get-parameter --region us-east-1 --name "id_rsa_aws" --with-decryption --query "Parameter.Value" --output text > $HOME/.ssh/id_rsa
 chmod 600 $HOME/.ssh/id_rsa
