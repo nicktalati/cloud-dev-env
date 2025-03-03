@@ -19,8 +19,11 @@ tar -C /opt -xzf nvim-linux-x86_64.tar.gz
 sudo -u ubuntu bash <<'EOF'
 set -xe
 
+mkdir -p $HOME/.ssh
+
 aws ssm get-parameter --region us-east-1 --name "id_rsa_aws" --with-decryption --query "Parameter.Value" --output text > $HOME/.ssh/id_rsa
 chmod 600 $HOME/.ssh/id_rsa
+ssh-keyscan -t rsa,ecdsa,ed25519 github.com >> $HOME/.ssh/known_hosts
 
 git clone git@github.com:nicktalati/dotfiles.git $HOME/dotfiles
 
