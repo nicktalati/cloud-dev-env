@@ -29,8 +29,9 @@ git clone git@github.com:nicktalati/dotfiles.git $HOME/dotfiles
 
 mkdir -p $HOME/.config
 ln -sf $HOME/dotfiles/zsh $HOME/.config/zsh
-ln -sf $HOME/dotfiles/tmux $HOME/.config/tmux
+ln -sf $HOME/dotfiles/tmux-alt $HOME/.config/tmux
 ln -sf $HOME/dotfiles/nvim $HOME/.config/nvim
+ln -sf $HOME/dotfiles/git $HOME/.config/git
 
 echo 'export PATH="$PATH:/opt/nvim-linux-x86_64/bin"' >> $HOME/.config/zsh/.zshenv
 
